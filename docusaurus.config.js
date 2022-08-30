@@ -79,7 +79,7 @@ const config = {
             title: "Docs",
             items: [
               {
-                label: "Landing Page",
+                label: "SHL Introduction",
                 to: "/",
               },
               {

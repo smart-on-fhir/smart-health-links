@@ -2,7 +2,7 @@
 sidebar_position: 0
 ---
 
-# Landing Page
+# SHL Introduction
 
 ## Overview Concept Video
 
