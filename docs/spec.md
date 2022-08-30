@@ -1,7 +1,11 @@
+---
+sidebar_position: 1
+---
+
 # SHL Protocol Specification
 
 ## Background and Design goals
-See [introduction](../).
+See [introduction](./index.md).
 
 #### Actors
 

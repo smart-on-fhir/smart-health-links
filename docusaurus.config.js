@@ -8,8 +8,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "SMART Health Links",
   tagline: "Consumer-controlled health data sharing with standardized links",
-  url: "https://your-docusaurus-test-site.com",
-  baseUrl: "/",
+  url: "https://docs.smarthealthit.org",
+  baseUrl: "/smart-health-links/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "throw",
   favicon: "img/favicon.ico",
@@ -79,8 +79,12 @@ const config = {
             title: "Docs",
             items: [
               {
-                label: "SHL Design Overview",
+                label: "Landing Page",
                 to: "/",
+              },
+              {
+                label: "SHL Design Overview",
+                to: "/design",
               },
               {
                 label: "SHL Protocol Specification",
