@@ -42,9 +42,11 @@ The app can periodically re-fetch the link to look for updates.
 
 ## "Paper+"
 
-Alice visits a Labs-R-Us, where she has blood drawn for a basic metabolic panel.
-She receives a print-out with details about the test that was performed as well
-as a QR code labeled as a "SMART Health Link." 
+Alice visits Labs-R-Us, where she has blood drawn for a basic metabolic panel.
+The lab establishes a passcode (whether randomly, or based on a convention like
+birth date, or by asking Alice to designate her own), then provides Alice with a
+print-out including details about the test that was performed together with a 
+QR code labeled as a "SMART Health Link." 
 
 Alice can:
 
