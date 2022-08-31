@@ -26,16 +26,16 @@ can enable integration with clinician-facing EHR systems as well as
 patient-facing care management apps.
 
 * Display link as QR code.
-Alice can present this QR to others. For eample she might display it to a school
+Alice can present this QR to others. For example she might display it to a school
 nurse as part of an on-site registration process.
 
 * Open link in health app.
 Alice can open this link in her personal health app to import her historical vaccine
 records. Her app will prompt her for the passcode and then will automatically 
-retrieve the set of vacccine records and recommendations. The app can periodically
+retrieve the set of vaccine records and recommendations. The app can periodically
 re-fetch the link to look for updates.
 
-### Additional use cases for the "Powerful Portals" pattern
+### Additional use cases for "Powerful Portals"
 
 * Lab results from a pharmacy portal
 * Clinical history from a provider portal
@@ -51,13 +51,13 @@ Alice can:
 
 * Scan the SHL QR using a generic QR reader app.
 This takes her to a Labs-R-Us web-based viewer where she can enter a passcode to view her lab
-result. Initially she might see a "pending" result, indicaing that the analysis
+result. Initially she might see a "pending" result, indicating that the analysis
 has not been completed. Eventually she will see a "final" result with the
 details available.
 
-* Scan the SHL QR using a SHL-aware health record managment app.
+* Scan the SHL QR using a SHL-aware health record management app.
 Alice's health record app prompts her for a passcode and automatically retrieves the lab
-results. Initially this might be a "pending" result, and eventualy it will
+results. Initially this might be a "pending" result, and eventually it will
 resolve to a "final" result.
 
   * Optional follow-up step: upgrade to a long-term SMART on FHIR connection.
@@ -70,11 +70,11 @@ resolve to a "final" result.
 * Share the SHL with a friend, caregiver, or healthcare provider.
 As in the "Powerful Portals" user story above, Alice can copy/paste the SHL to
 share this lab result with a recipient of her choice. The recipient can open the
-link in a web brower or in an SHL-aware health record management app, just as
+link in a web browser or in an SHL-aware health record management app, just as
 Alice can. This workflow can enable integration with clinician-facing EHR
 systems as well as patient-facing care management apps.
 
-### Additional use cases for the "Paper+" pattern
+### Additional use cases for "Paper+"
 
 * Vaccine results after a pharmacy visit
 * Vision prescription after an optometrist visit
@@ -85,7 +85,7 @@ systems as well as patient-facing care management apps.
 ## "Personal Platforms" 
 
 Alice uses a personal health record app on her phone. She connects to data from
-various sources including clincal providers, labs, pharmacies, and others. When
+various sources including clinical providers, labs, pharmacies, and others. When
 she wants to share a subset of these data, she selects an option to "Share my
 records with SMART Health Links", which prompts her to create a passcode and
 then generates a SHL. Using this technique, Alice can mix and match data from

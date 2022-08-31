@@ -31,7 +31,7 @@ At configuration time, the Data Sharer's software SHALL generate (or obtain from
 :::info 
 **:notebook:   Design Note (trust and encryption)**
 
-*This pattern of encrypting files allows for deployment scenarios where the Resource Server is not trusted to know the information inside of the manifest's files. In such scenarioes, the Data Sharer and Data Recipient can treat the Resource Server as a blind intermediary. That said: in many deployment scenarios the Resource Server will be hosted by a healthcare provider or other entity that already has access to such files. For consistency, this protocol always applies encryption.*
+*This pattern of encrypting files allows for deployment scenarios where the Resource Server is not trusted to know the information inside of the manifest's files. In such scenarios, the Data Sharer and Data Recipient can treat the Resource Server as a blind intermediary. That said: in many deployment scenarios the Resource Server will be hosted by a healthcare provider or other entity that already has access to such files. For consistency, this protocol always applies encryption.*
 :::
 
 :::info
@@ -78,7 +78,7 @@ The JSON Payload is then:
 :::
 
 The following optional step may occur sometime after a SHLink is generated:
-* **Optional: Update Shared Files**. For some sharing scenarios, the Data Sharer MAY update the shared files from time to time (e.g., when new lab results arrive or new immunizations are performed). Updated verions SHALL be encrypted using the same key as the initial version. 
+* **Optional: Update Shared Files**. For some sharing scenarios, the Data Sharer MAY update the shared files from time to time (e.g., when new lab results arrive or new immunizations are performed). Updated versions SHALL be encrypted using the same key as the initial version. 
 
 
 ###### Example SHLink Generation
