@@ -87,6 +87,10 @@ const config = {
                 to: "/design",
               },
               {
+                label: "SHL User Stories",
+                to: "/user-stories",
+              },
+              {
                 label: "SHL Protocol Specification",
                 to: "/spec",
               },
