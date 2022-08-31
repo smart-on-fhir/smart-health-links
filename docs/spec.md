@@ -174,6 +174,8 @@ storage service.
 * `embedded` (SHALL be present if no `location` is included):
 JSON string directly embedding the encrypted contents of the file as a compact
 JSON Web Encryption string (see ["Encrypting"](#encrypting-and-decrypting-files)).
+If present, the `embedded` value SHALL be up-to-date as of the time the
+manifest is requested.
 
 ##### Example SHLink Manifest File
 
