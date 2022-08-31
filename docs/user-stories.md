@@ -37,9 +37,8 @@ re-fetch the link to look for updates.
 
 ### Additional use cases for "Powerful Portals"
 
+* Clinical Summary from a provider portal; can share during an emergency department visit while traveling
 * Lab results from a pharmacy portal
-* Clinical history from a provider portal
-
 
 ## "Paper+"
 
