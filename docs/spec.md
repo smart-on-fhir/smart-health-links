@@ -1,11 +1,8 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # SHL Protocol Specification
-
-## Background and Design goals
-See [introduction](./index.md).
 
 #### Actors
 
@@ -133,9 +130,32 @@ When responding to a manifest request, the Resource Server SHALL reject requests
 
 * `remainingAttempts`: number of attempts remaining before the SHL is disabled
 
+### Limitations on Manifest `.files.location` links
+
+The Data Sharer SHALL ensure that `.files.location` links can be dereferenced
+without additional authentication, and that they are short-lived. The lifetime
+of `.files.location` links SHALL NOT exceed one hour. The Data Sharer MAY create
+one-time-use `.files.location` links that are consumed as soon as they are
+dereferenced.
+
+The Data Recipient SHALL treat any manifest file locations as short-lived and
+potentially limited to one-time use. The Data Recipient SHALL NOT attempt to
+dereference a manifest's `.files.location` link more than one hour seconds after
+requesting the manifest, and SHALL be capable of re-fetching the manifest to
+obtain fresh `location` links in the event that they have expired or been
+consumed.
+
+
 The following optional step may occur sometime after a SHLink is shared:
 
-* **Optional: Periodically Re-fetch Updated Files**.  When the original QR includes the `L` flag for long-term use, the Data Recipient MAY re-fetch contents at any time. When re-fetching data, the Data Recipient SHALL begin from the final redirect URL it discovered when first following the QR Link, because the first-stage redirection may no longer be in place. To support long-term access, the Manifest HTTP response SHOULD include an [`Expires` header](https://www.imperva.com/learn/performance/cache-control) indicating the time when a subsequent fetch should be attempted.
+### Optional: Periodically Re-fetch Updated Files 
+When the original QR includes the `L` flag for long-term use, the Data Recipient
+MAY re-fetch contents at any time. When re-fetching data, the Data Recipient
+SHALL begin from the final redirect URL it discovered when first following the
+QR Link, because the first-stage redirection may no longer be in place. To
+support long-term access, the Manifest HTTP response SHOULD include an
+[`Expires` header](https://www.imperva.com/learn/performance/cache-control)
+indicating the time when a subsequent fetch should be attempted.
 
 ---
 
@@ -147,7 +167,13 @@ The SHLink Manifest File is a JSON file with a `files` array where each entry in
     * `"application/smart-health-card"` or
     *  `"application/smart-api-access"` or 
     *  `"application/fhir+json"`
-* `location`: URL to the file. This URL SHALL be short-lived and intended for single use. For example, it could be a short-lifetime signed URL to a file hosted in a cloud storage service.
+* `location` (SHALL be present if no `embedded` content is included):
+URL to the file.  This URL SHALL be short-lived and intended for single use. For
+example, it could be a short-lifetime signed URL to a file hosted in a cloud
+storage service.
+* `embedded` (SHALL be present if no `location` is included):
+JSON string directly embedding the encrypted contents of the file as a compact
+JSON Web Encryption string (see ["Encrypting"](#encrypting-and-decrypting-files)).
 
 ##### Example SHLink Manifest File
 
@@ -156,13 +182,17 @@ The SHLink Manifest File is a JSON file with a `files` array where each entry in
   "files": [{
     "contentType": "application/smart-health-card",
     "location": "https://bucket.cloud.example.org/file1?sas=MFXK6jL3oL3SI_lRfi_-cEfzIs5oHs6rRWmrsCAFzvk"
-  }, {
+  }, 
+  {
+    "contentType": "application/smart-health-card",
+    "embedded": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..8zH0NmUXGwMOqEya.xdGRpgyvE9vNoKzHlr4itKKW2vo<snipped>"
+  },
+  {
     "contentType": "application/fhir+json",
     "location": "https://bucket.cloud.example.org/file2?sas=T34xzj1XtqTYb2lzcgj59XCY4I6vLN3AwrTUIT9GuSc"
   }]
 }
 ```
-
 
 ## Encrypting and Decrypting Files
 
