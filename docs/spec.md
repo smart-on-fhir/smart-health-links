@@ -140,7 +140,7 @@ dereferenced.
 
 The Data Recipient SHALL treat any manifest file locations as short-lived and
 potentially limited to one-time use. The Data Recipient SHALL NOT attempt to
-dereference a manifest's `.files.location` link more than one hour seconds after
+dereference a manifest's `.files.location` link more than one hour after
 requesting the manifest, and SHALL be capable of re-fetching the manifest to
 obtain fresh `location` links in the event that they have expired or been
 consumed.
