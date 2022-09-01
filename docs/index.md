@@ -6,7 +6,7 @@ sidebar_position: 0
 
 ## Overview Concept Video
 
-https://www.youtube.com/watch?v=SbM9I20lH64
+https://www.youtube.com/watch?v=SbM9I20lH64 (note that the technical details here are out of date, but it's still a good conceptual introduction)
 
 ## Technical Design Review Video
 
