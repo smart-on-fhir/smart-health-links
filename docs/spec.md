@@ -321,5 +321,5 @@ For example, the manifest for an SHL from Labs-R-Us might include a `application
 
 Notes:
 
-* Clients may need to pre-register with the SMART on FHIR service before they can request a connection
+* Clients may need to pre-register with the SMART App Launch enabled service before they can request a connection. A client might compare `"address"` against an internal database to determine whether it can connect, retrieve `{address}/.well-known/smart-configuration` to determine whether the [Dynamic Client Registration Protocol](http://hl7.org/fhir/smart-app-launch/client-confidential-asymmetric.html) is available or come up with another way to determine connectivity in order to inform the user of how they can act on the SHL.
 * This capability will only work in cases where the SHL Recipient is authorized to approve SMART App Launch requests; other recipients might see the Endpoint but would be unable to complete a SMART App Launch
