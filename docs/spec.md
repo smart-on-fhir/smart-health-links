@@ -304,7 +304,7 @@ accomplished with a SHL manifest entry of type `application/fhir+json` that prov
 
 * `name` describes the SMART on FHIR endpoint with sufficient detail for the SHL Recipient to decide whether to connect
 * `connectionType` is `{"system": "http://terminology.hl7.org/CodeSystem/restful-security-service", "code": "SMART-on-FHIR"}`
-* `address` is the FHIR API base URL of the server that supports SMART App Launch
+* `address` is the FHIR API base URL of the server that supports [SMART App Launch](http://hl7.org/fhir/smart-app-launch/)
 
 For example, the manifest for an SHL from Labs-R-Us might include a `application/fhir+json` entry with:
 
