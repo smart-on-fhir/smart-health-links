@@ -255,7 +255,7 @@ const decoded = JSON.parse(new TextDecoder().decode(decrypted.plaintext));
 
 ## Use Case Examples
 
-##### Using SHL to share an interactive experience
+### Using SHL to share an interactive experience
 
 While the SMART Health Links spec focuses on providing access to structured data, it's often
 useful to share an interactive experience such as a web-based diagnostic portal where the
@@ -267,7 +267,6 @@ in SHL with a manifest entry of type `application/fhir+json` that provides a
 * `connectionType` is `{"system": "https://smarthealthit.org", "code": "shl-interactive-experience"}`
 * `address` is the URI for the interactive experience
 * `period` optionally documents the window of time when the interactive experience is available
-  * `end` SHALL be populated if there is a time limit
 
 For example, the manifest for an SHL that offers the user the opportunity to "Review a case"
 might include a `application/fhir+json` entry with:
@@ -295,7 +294,7 @@ since SHL provides a consistent pattern that users and tools can recognize, star
 a foundation to support future expansion.
 
 
-##### "Upgrading" from SHL to a consumer-mediated SMART on FHIR Connection
+### "Upgrading" from SHL to a consumer-mediated SMART on FHIR Connection
 
 In addition to providing direct access to a pre-configured data set, SHLs can include information
 to help establish a consumer-mediated SMART on FHIR connection to the data source. This can be
@@ -312,7 +311,7 @@ For example, the manifest for an SHL from Labs-R-Us might include a `application
 {
   "resourceType": "Endpoint",
   "status": "active",
-  "name": "Labs-R-Us",
+  "name": "Labs-R-Us Application Access",
   "address": "https://fhir.example.org",
   "connectionType": {"system": "http://terminology.hl7.org/CodeSystem/restful-security-service", "code": "SMART-on-FHIR"},
   "payloadType": [{"system": "http://terminology.hl7.org/CodeSystem/endpoint-payload-type", "code": "none"}],
@@ -321,5 +320,15 @@ For example, the manifest for an SHL from Labs-R-Us might include a `application
 
 Notes:
 
-* Clients may need to pre-register with the SMART App Launch enabled service before they can request a connection. A client might compare `"address"` against an internal database to determine whether it can connect, retrieve `{address}/.well-known/smart-configuration` to determine whether the [Dynamic Client Registration Protocol](http://hl7.org/fhir/smart-app-launch/client-confidential-asymmetric.html) is available or come up with another way to determine connectivity in order to inform the user of how they can act on the SHL.
-* This capability will only work in cases where the SHL Recipient is authorized to approve SMART App Launch requests; other recipients might see the Endpoint but would be unable to complete a SMART App Launch
+* Clients may need to pre-register with the SMART App Launch enabled service
+before they can request a connection. A client might compare `"address"`
+against an internal database to determine whether it can connect, retrieve
+`{address}/.well-known/smart-configuration` to determine whether the [Dynamic
+Client Registration
+Protocol](https://hl7.org/fhir/smart-app-launch/app-launch.html#register-app-with-ehr)
+is available or come up with another way to determine connectivity in order to
+inform the user of how they can act on the SHL.
+
+* This capability will only work in cases where the user receiving the SHL is authorized
+to approve SMART App Launch requests; other recipients might see the Endpoint
+but would be unable to complete a SMART App Launch
