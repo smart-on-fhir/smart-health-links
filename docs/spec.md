@@ -48,7 +48,7 @@ Based the configuration from (1), the resource server generates a "manifest URL"
 
 * SHALL include at least **256 bits of entropy**
     * A suggested approach is to generate a cryptographically strong 32-byte random sequence and then base64url-encode this sequence to obtain a 43-character string that is used as a path segment. For example: `https://shl.example.org/manifests/I91rhba3VsuGXGchcnr6VHlQFKxfE28kuZ0ssbEuxno/manifest.json`
-* SHALL NOT exceed **128 characters** in length
+* SHALL NOT exceed **128 characters** in length (note, this maximum applies to the `url` field of the manifest, not to the entire SHLink).
 
 The Data Sharer's software incorporates the manifest URL into a SHLink as follows:
 
