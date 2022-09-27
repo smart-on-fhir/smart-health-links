@@ -10,7 +10,7 @@ sidebar_position: 2
 * **Data Recipient**. Person or organization responsible for receiving health data
 
 
-## 1. Data Sharer Configures a new SHLink
+## Pre-protocol step: Data Sharer Configures a new SHLink
 
 The Data Sharer makes a few decisions at configuration time:
 
@@ -40,7 +40,7 @@ At configuration time, the Data Sharer's software SHALL generate (or obtain from
 *We do not standardize the protocol by which the Data Sharer's local software communicates with the Resource Server. These may be provided by the same vendor and use internal APIs to communicate -- or there may be no "local" software at all.*
 :::
 
-## 2. Data Sharer Generates a SHLink URI
+## Data Sharer Generates a SHLink URI
 
 ### Establish a SHLink Manifest URL
 
@@ -102,7 +102,7 @@ const shlink = `https://viewer.example.org#` + shlinkBare
 // "https://viewer.example.org#shlink:/eyJ1cmwiOiJodHRwczovL2Voci5leGFtcGxlLm9yZy9xci9ZOXh3a1VkdG1OOXd3b0pvTjNmZkpJaFgyVUd2Q0wxSm5sUFZOTDNrRFdNL20iLCJmbGFnIjoiTFAiLCJrZXkiOiJyeFRnWWxPYUtKUEZ0Y0VkMHFjY2VOOHdFVTRwOTRTcUF3SVdRZTZ1WDdRIiwibGFiZWwiOiJCYWNrLXRvLXNjaG9vbCBpbW11bml6YXRpb25zIGZvciBPbGl2ZXIgQnJvd24ifQ"
 ```
 
-## 3. Data Sharer transmits a SHLink
+## Data Sharer transmits a SHLink
 
 The Data Sharer can convey a SHLink by any common means including e-mail, secure messaging, or other text-based communication channels. When presenting a SHLink in person, the Data Sharer can also display the link as a QR code using any standard library to create a QR image from the SHLink URI. 
 
@@ -112,26 +112,57 @@ When sharing a SHLink via QR code, the following recommendations apply:
 * Include the [SMART Logo](https://demo.vaxx.link/smart-logo.svg) on a white background over the center of the QR, scaled to occupy 15% of the image area
 
 
-## 4. Data Recipient obtains a SHLink
+## Data Recipient processes a SHLink
 
 The Data Recipient can process a SHLink using the following steps.
 
-* Decode the SHLink JSON payload and `POST` to payload's `url`
-    * Method: `POST`
+* Decode the SHLink JSON payload
+* Issue a [SHLink Manifest Request](#shlink-manifest-request) to payload's `url`
+* Decrypt and process files from the manifest
+* Optional: Periodically re-issue a SHLink Manifest Request. When the original QR includes the
+`L` flag for long-term use, the Data Recipient MAY re-fetch a manifest at any time.
+ The client SHOULD wait until the previous Manifest Request's `Expires` time has
+ been reached before re-fetching.
+ 
+---
+
+## SHLink Manifest Request
+
+The Data recipient SHALL retrieve a SHLink's manifest by issuing a request with:
+
+* Method: `POST`
     * Headers:
         * `content-type: application/json`
     * Body: JSON object including
         * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Data Sharer
         * `passcode`: Conditional. SHALL be populated with a user-supplied Passcode if the `P` flag was present in the SHLink payload
         * `embeddedLengthMax`: Optional. Integer upper bound on the length of embedded payloads (see [`.files.embedded`](#shlink-manifest-file-format))
-* Obtain a manifest and follow links to download files
-* Decrypt and process each file
 
-When responding to a manifest request, the Resource Server SHALL reject requests with an invalid Passcode and SHALL enforce a total lifetime count of incorrect Passcodes for a given SHLink, to prevent attackers from performing an exhaustive Passcode search. The error response for an invalid Passcode SHALL use the `401` HTTP status code and the response body SHALL be a JSON payload with
+If the SHLink is no longer active, the Resource Server SHALL respond with a 404.
+
+If an invalid Passcode is supplied, the Resource Server SHALL reject the request and SHALL enforce a total lifetime count of incorrect Passcodes for a given SHLink, to prevent attackers from performing an exhaustive Passcode search. The error response for an invalid Passcode SHALL use the `401` HTTP status code and the response body SHALL be a JSON payload with
 
 * `remainingAttempts`: number of attempts remaining before the SHL is disabled
 
-### Limitations on Manifest `.files.location` links
+If the SHlink request is valid, the Resource Server SHALL return a  SHLink Manifest File with `content-type: application/json`. The SHLink Manifest File is a JSON file with a `files` array where each entry includes:
+
+* `contentType`: One of  the following values:
+    * `"application/smart-health-card"` or
+    *  `"application/smart-api-access"` or 
+    *  `"application/fhir+json"`
+* `location` (SHALL be present if no `embedded` content is included): URL to the file.
+This URL SHALL be short-lived and intended for single use. For example, it could be a
+short-lifetime signed URL to a file hosted in a cloud storage service.
+* `embedded` (SHALL be present if no `location` is included): JSON string directly
+embedding the encrypted contents of the file as a compact JSON Web Encryption
+string (see ["Encrypting"](#encrypting-and-decrypting-files)).
+
+When the original QR includes the `L` flag for long-term use, the HTTP response SHOULD
+include an [`Expires` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires)
+indicating the time when clients should attempt a re-fetch, if the `L` flag 
+
+
+###  `.files.location` links
 
 The Data Sharer SHALL ensure that `.files.location` links can be dereferenced
 without additional authentication, and that they are short-lived. The lifetime
@@ -146,38 +177,17 @@ requesting the manifest, and SHALL be capable of re-fetching the manifest to
 obtain fresh `location` links in the event that they have expired or been
 consumed.
 
+### `.files.embedded` content
 
-The following optional step may occur sometime after a SHLink is shared:
+If the client has specified `embeddedLengthMax` in the manifest request, the sever SHALL NOT
+embedded payload longer than the client-designated maximum.
 
-### Optional: Periodically Re-fetch Updated Files 
-When the original QR includes the `L` flag for long-term use, the Data Recipient
-MAY re-fetch contents at any time. When re-fetching data, the Data Recipient
-SHALL begin from the final redirect URL it discovered when first following the
-QR Link, because the first-stage redirection may no longer be in place. To
-support long-term access, the Manifest HTTP response SHOULD include an
-[`Expires` header](https://www.imperva.com/learn/performance/cache-control)
-indicating the time when a subsequent fetch should be attempted.
+If present, the `embedded` value SHALL be up-to-date as of the time the manifest is
+requested. If the client has specified `embeddedLengthMax` in the manifest request,
+the sever SHALL NOT embedded payload longer than the client-designated maximum.
 
 ---
 
-## SHLink Manifest File Format
-
-The SHLink Manifest File is a JSON file with a `files` array where each entry includes:
-
-* `contentType`: One of  the following values:
-    * `"application/smart-health-card"` or
-    *  `"application/smart-api-access"` or 
-    *  `"application/fhir+json"`
-* `location` (SHALL be present if no `embedded` content is included):
-URL to the file.  This URL SHALL be short-lived and intended for single use. For
-example, it could be a short-lifetime signed URL to a file hosted in a cloud
-storage service.
-* `embedded` (SHALL be present if no `location` is included):
-JSON string directly embedding the encrypted contents of the file as a compact
-JSON Web Encryption string (see ["Encrypting"](#encrypting-and-decrypting-files)).
-If present, the `embedded` value SHALL be up-to-date as of the time the
-manifest is requested. If the client has specified `embeddedLengthMax` in the manifest request, the sever SHALL NOT
-embedded payload longer than the client-designated maximum.
 
 ##### Example SHLink Manifest File
 
