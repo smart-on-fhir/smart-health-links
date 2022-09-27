@@ -123,6 +123,7 @@ The Data Recipient can process a SHLink using the following steps.
     * Body: JSON object including
         * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Data Sharer
         * `passcode`: Conditional. SHALL be populated with a user-supplied Passcode if the `P` flag was present in the SHLink payload
+        * `embeddedLengthMax`: Optional. Integer upper bound on the length of embedded payloads (see [`.files.embedded`](#shlink-manifest-file-format))
 * Obtain a manifest and follow links to download files
 * Decrypt and process each file
 
@@ -175,7 +176,8 @@ storage service.
 JSON string directly embedding the encrypted contents of the file as a compact
 JSON Web Encryption string (see ["Encrypting"](#encrypting-and-decrypting-files)).
 If present, the `embedded` value SHALL be up-to-date as of the time the
-manifest is requested.
+manifest is requested. If the client has specified `embeddedLengthMax` in the manifest request, the sever SHALL NOT
+embedded payload longer than the client-designated maximum.
 
 ##### Example SHLink Manifest File
 
