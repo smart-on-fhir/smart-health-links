@@ -136,7 +136,7 @@ The Data recipient SHALL retrieve a SHLink's manifest by issuing a request to th
 * Body: JSON object including
   * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Data Sharer
   * `passcode`: Conditional. SHALL be populated with a user-supplied Passcode if the `P` flag was present in the SHLink payload
-  * `embeddedLengthMax`: Optional. Integer upper bound on the length of embedded payloads (see [`.files.embedded`](#shlink-manifest-request))
+  * `embeddedLengthMax`: Optional. Integer upper bound on the length of embedded payloads (see [`.files.embedded`](#filesembedded-content))
 
 If the SHLink is no longer active, the Resource Server SHALL respond with a 404.
 
