@@ -58,7 +58,7 @@ The SHLink Payload is a JSON object including the following properties:
 
 * `url`: Manifest URL for this SHLink
 * `key`: Decryption key for processing files returned in the manifest. 43 characters, consisting of 32 random bytes base64urlencoded.
-* `exp`: Optional. Expiration time in Epoch seconds. Hint to help the Data Recipient determine if this QR is stale.
+* `exp`: Optional. Number representing expiration time in Epoch seconds, as a hint to help the Data Recipient determine if this QR is stale. (Note: epoch times should be parsed into 64-bit numeric types.)
 * `flag`: Optional. String created by concatenating single-character flags in alphabetical order
   * `L` Indicates the SHLink is intended for long-term use
   * `P` Indicates the SHLink requires a Passcode to resolve
