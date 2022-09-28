@@ -128,15 +128,15 @@ The Data Recipient can process a SHLink using the following steps.
 
 ## SHLink Manifest Request
 
-The Data recipient SHALL retrieve a SHLink's manifest by issuing a request with:
+The Data recipient SHALL retrieve a SHLink's manifest by issuing a request to the `url` in the SHLink payload, with:
 
 * Method: `POST`
-    * Headers:
-        * `content-type: application/json`
-    * Body: JSON object including
-        * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Data Sharer
-        * `passcode`: Conditional. SHALL be populated with a user-supplied Passcode if the `P` flag was present in the SHLink payload
-        * `embeddedLengthMax`: Optional. Integer upper bound on the length of embedded payloads (see [`.files.embedded`](#shlink-manifest-file-format))
+* Headers:
+  * `content-type: application/json`
+* Body: JSON object including
+  * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Data Sharer
+  * `passcode`: Conditional. SHALL be populated with a user-supplied Passcode if the `P` flag was present in the SHLink payload
+  * `embeddedLengthMax`: Optional. Integer upper bound on the length of embedded payloads (see [`.files.embedded`](#shlink-manifest-request))
 
 If the SHLink is no longer active, the Resource Server SHALL respond with a 404.
 
