@@ -20,10 +20,10 @@ The Data Sharer makes a few decisions at configuration time:
 
 Regarding "what to share": a single SHLink at a specific point in time will *resolve* to a manifest of files of the following types:
 * `application/smart-health-card`: a JSON file with a `.verifiableCredential` array containing SMART Health Card JWS strings, as specified by https://spec.smarthealth.cards#via-file-download.
+* `application/fhir+json`: a JSON file containing any FHIR resource (e.g., an individual resource or a Bundle of resources). Generally this format may not be tamper-proof.
 * `application/smart-api-access`: a JSON file with a SMART Access Token Response (see [SMART App Launch](https://hl7.org/fhir/smart-app-launch/app-launch.html#response-5)). Two additional properties are defined:
   * `aud` Required string indicating the FHIR Server Base URL where this token can be used (e.g.,  ``"https://server.example.org/fhir"``)
   * `query`: Optional array of strings acting as hints to the client, indicating queries it might want to make (e.g., `["Coverage?patient=123&_tag=family-insurance"]`)
-* `application/fhir+json`: a JSON file containing an arbitrary FHIR Bundle of data. Generally this format will not be tamper-proof.
 
 
 At configuration time, the Data Sharer's software SHALL generate (or obtain from the Resource Server) a random key used for encrypting/decrypting the files in the manifest (see ["Decryption"](#Encrypting-and-Decrypting-Files)). 
@@ -264,3 +264,83 @@ const decoded = JSON.parse(new TextDecoder().decode(decrypted.plaintext));
 }
 */
 ```
+
+## Use Case Examples
+
+### Using SHL to share an interactive experience
+
+While the SMART Health Links spec focuses on providing access to structured data, it's often
+useful to share an interactive experience such as a web-based diagnostic portal where the
+SHL Data Recipient can review and add comments to a patient record. This can be accomplished
+in SHL with a manifest entry of type `application/fhir+json` that provides a
+[FHIR Endpoint resource](https://hl7.org/fhir/endpoint.html) where:
+
+* `name` describes the interactive experience with sufficient detail for the SHL Recipient to decide whether to engage
+* `connectionType` is `{"system": "https://smarthealthit.org", "code": "shl-interactive-experience"}`
+* `address` is the URI for the interactive experience
+* `period` optionally documents the window of time when the interactive experience is available
+
+For example, the manifest for an SHL that offers the user the opportunity to "Review a case"
+might include a `application/fhir+json` entry with:
+
+```json
+{
+  "resourceType": "Endpoint",
+  "status": "active",
+  "name": "Review and comment on Alice's case in ACME Medical Diagnostic Portal",
+  "address": "https://interact.example.org/case-id/521039c3-4bb9-45bd-8271-6001d2f4dea9",
+  "period": {"end": "2022-10-20T12:30:00Z"},
+  "connectionType": {"system": "https://smarthealthit.org", "code": "shl-interactive-experience"},
+  "payloadType": [{"system": "http://terminology.hl7.org/CodeSystem/endpoint-payload-type", "code": "none"}],
+}
+```
+
+Notes:
+
+* There is no perfect FHIR resource for documenting an interactive experience URL. `Endpoint` and
+`DocumentReference` are both plausible candidates, and we recommend `Endpoint` here because
+`DocumentReference` is designed for static payloads.
+* If the *only* content being shared via SHL is a single interactive experience, implementers 
+might consider sharing the interactive experience URL directly, instead of through SHL. However,
+since SHL provides a consistent pattern that users and tools can recognize, starting with SHL provides
+a foundation to support future expansion.
+
+
+### "Upgrading" from SHL to a consumer-mediated SMART on FHIR Connection
+
+In addition to providing direct access to a pre-configured data set, SHLs can include information
+to help establish a consumer-mediated SMART on FHIR connection to the data source. This can be
+accomplished with a SHL manifest entry of type `application/fhir+json` that provides a
+[FHIR Endpoint resource](https://hl7.org/fhir/endpoint.html) where:
+
+* `name` describes the SMART on FHIR endpoint with sufficient detail for the SHL Recipient to decide whether to connect
+* `connectionType` is `{"system": "http://terminology.hl7.org/CodeSystem/restful-security-service", "code": "SMART-on-FHIR"}`
+* `address` is the FHIR API base URL of the server that supports [SMART App Launch](http://hl7.org/fhir/smart-app-launch/)
+
+For example, the manifest for an SHL from Labs-R-Us might include a `application/fhir+json` entry with:
+
+```json
+{
+  "resourceType": "Endpoint",
+  "status": "active",
+  "name": "Labs-R-Us Application Access",
+  "address": "https://fhir.example.org",
+  "connectionType": {"system": "http://terminology.hl7.org/CodeSystem/restful-security-service", "code": "SMART-on-FHIR"},
+  "payloadType": [{"system": "http://terminology.hl7.org/CodeSystem/endpoint-payload-type", "code": "none"}],
+}
+```
+
+Notes:
+
+* Clients may need to pre-register with the SMART App Launch enabled service
+before they can request a connection. A client might compare `"address"`
+against an internal database to determine whether it can connect, retrieve
+`{address}/.well-known/smart-configuration` to determine whether the [Dynamic
+Client Registration
+Protocol](https://hl7.org/fhir/smart-app-launch/app-launch.html#register-app-with-ehr)
+is available or come up with another way to determine connectivity in order to
+inform the user of how they can act on the SHL.
+
+* This capability will only work in cases where the user receiving the SHL is authorized
+to approve SMART App Launch requests; other recipients might see the Endpoint
+but would be unable to complete a SMART App Launch
