@@ -165,6 +165,11 @@ issued too frequently, the server MAY respond with HTTP status `429 Too Many
 Requests` and a `Retry-After` header indicating the minimum time that a client
 SHALL wait before re-issuing a manifest request.
 
+:::info
+**:notebook: Design Note (Rate Limiting)**
+*More detailed guidance on polling will require real-world implementation experience. The current guidance provides the client a hint about how often to poll, and provides a way to convey that requests are being issued too frequently. We encourage implementers to experiment with additional capabilities.*
+:::
+
 
 ###  `.files.location` links
 
