@@ -63,6 +63,7 @@ The SHLink Payload is a JSON object including the following properties:
   * `L` Indicates the SHLink is intended for long-term use
   * `P` Indicates the SHLink requires a Passcode to resolve
 * `label`: Optional.  String no longer than 80 characters that provides a short description of the data behind the SHLink. 
+* `v`: Optional. Integer representing the SHLinks protocol version this SHLink conforms to. MAY be omitted when the default value (`1`) applies.
 
 The JSON Payload is then:
 * Minified
