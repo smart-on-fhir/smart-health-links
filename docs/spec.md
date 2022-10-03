@@ -119,10 +119,7 @@ The Data Recipient can process a SHLink using the following steps.
 * Decode the SHLink JSON payload
 * Issue a [SHLink Manifest Request](#shlink-manifest-request) to payload's `url`
 * Decrypt and process files from the manifest
-* Optional: Periodically re-issue a SHLink Manifest Request. When the original QR includes the
-`L` flag for long-term use, the Data Recipient MAY re-fetch a manifest at any time.
- The client SHOULD wait until the previous Manifest Request's `Expires` time has
- been reached before re-fetching.
+* Optional:  When the original QR includes the `L` flag for long-term use, the Data Recipient can re-fetch the manifest periodically, following [polling guidance](#polling-manifest-for-changes) to avoid issing too many requests
  
 ---
 
@@ -157,9 +154,21 @@ short-lifetime signed URL to a file hosted in a cloud storage service.
 embedding the encrypted contents of the file as a compact JSON Web Encryption
 string (see ["Encrypting"](#encrypting-and-decrypting-files)).
 
-When the original QR includes the `L` flag for long-term use, the HTTP response SHOULD
-include an [`Expires` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires)
-indicating the time when clients should attempt a re-fetch, if the `L` flag 
+
+### Polling manifest for changes
+When the original QR includes the `L` flag for long-term use, the client MAY
+periodically poll for changes in the manifest. The server MAY provide a
+[`Retry-After`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After)
+header on successful manifest responses, indicating the minimum time that the
+client SHOULD wait before its next polling request. If manifest requests are
+issued too frequently, the server MAY respond with HTTP status `429 Too Many
+Requests` and a `Retry-After` header indicating the minimum time that a client
+SHALL wait before re-issuing a manifest request.
+
+:::info
+**:notebook: Design Note (Rate Limiting)**
+*More detailed guidance on polling will require real-world implementation experience. The current guidance provides the client a hint about how often to poll, and provides a way to convey that requests are being issued too frequently. We encourage implementers to experiment with additional capabilities.*
+:::
 
 
 ###  `.files.location` links
