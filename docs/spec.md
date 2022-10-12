@@ -65,11 +65,39 @@ The SHLink Payload is a JSON object including the following properties:
 * `label`: Optional.  String no longer than 80 characters that provides a short description of the data behind the SHLink. 
 * `v`: Optional. Integer representing the SHLinks protocol version this SHLink conforms to. MAY be omitted when the default value (`1`) applies.
 
+
 The JSON Payload is then:
 * Minified
 * Base64urlencoded
 * Prefixed with `shlink:/`
 * Optionally prefixed with a viewer URL that ends with `#`
+
+
+**:notebook: Design Note: Protocol Versioning**
+
+Data Recipients can rely on the following behaviors for any SHL with the `shlink:` URI scheme. 
+
+* SHLink Payload processing
+  * SHLink Payloads SHALL be constructed as per `"v":1` (i.e., payloads are Base64urlencoded, minified JSON objects)
+    * Any changes to this design will require a new URI scheme, rather than a `v` bump
+* SHLink Payload stability
+  * `.label`, `.exp`, and `.flag` SHALL always work as defined for `"v":1`
+    * Any changes to this design will require a new URI scheme, rather than a `v` bump
+  * New properties MAY be introducd without a version bump, as long as they're optional and safe to ignore
+  * Introduction of properties that can't safely be ignored will require a `v` bump
+* SHLink Payload flags
+  * New flag values MAY be introduced without a version bump, as long as they're safe to ignore
+  * Data Recipients SHALL ignore flag values they don't recognize
+  * Introduction of new flag values that can't safely be ignored will require a `v` bump
+* Manifest URL request/response
+  * New request parameters or headers MAY be introducd without a version bump, as long as they're optional and safe to ignore
+  * New response parameters or headers MAY be introducd without a version bump, as long as they're optional and safe to ignore
+  * Introduction of parameters or headers that can't safely be ignored will require a `v` bump
+* Encryption and signature schemes
+  * Changes to the cryptographic protocol will require a `v` bump
+
+This means that Data Recipients can always recognize a SHLink Payload and display its label to the user. If a Data Recipient does not recognize and support the `v` in a SHLink Payload, it SHOULD display an appropriate message to the user and SHOULD NOT proceed with a manifest request, unless it has some reason to believe that proceeding is safe.
+:::
 
 :::info
 
