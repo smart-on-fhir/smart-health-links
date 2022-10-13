@@ -75,9 +75,9 @@ The JSON Payload is then:
 
 **:notebook: Design Note: Protocol Versioning**
 
-Data Recipients can rely on the following behaviors for any SHL with the `shlink:` URI scheme. 
+Implementations can rely on the following behaviors:
 
-* SHLink Payload processing
+* SHLink Payload processing for `shlink:` URIs
   * SHLink Payloads SHALL be constructed as per `"v":1` (i.e., payloads are Base64urlencoded, minified JSON objects)
     * Any changes to this design will require a new URI scheme, rather than a `v` bump
 * SHLink Payload stability
