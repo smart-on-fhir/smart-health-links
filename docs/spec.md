@@ -83,7 +83,8 @@ Data Recipients can rely on the following behaviors for any SHL with the `shlink
 * SHLink Payload stability
   * `.label`, `.exp`, and `.flag` SHALL always work as defined for `"v":1`
     * Any changes to this design will require a new URI scheme, rather than a `v` bump
-  * New properties MAY be introducd without a version bump, as long as they're optional and safe to ignore
+  * New properties MAY be introduced without a version bump, as long as they're optional and safe to ignore
+  * Data Recipients SHALL ignore properties they don't recognize
   * Introduction of properties that can't safely be ignored will require a `v` bump
 * SHLink Payload flags
   * New flag values MAY be introduced without a version bump, as long as they're safe to ignore
@@ -92,6 +93,7 @@ Data Recipients can rely on the following behaviors for any SHL with the `shlink
 * Manifest URL request/response
   * New request parameters or headers MAY be introducd without a version bump, as long as they're optional and safe to ignore
   * New response parameters or headers MAY be introducd without a version bump, as long as they're optional and safe to ignore
+  * Data Sharers and Recipients SHALL ignore parameters and headers they don't recognize
   * Introduction of parameters or headers that can't safely be ignored will require a `v` bump
 * Encryption and signature schemes
   * Changes to the cryptographic protocol will require a `v` bump
