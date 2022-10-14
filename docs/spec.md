@@ -98,7 +98,7 @@ Implementations can rely on the following behaviors:
 * Encryption and signature schemes
   * Changes to the cryptographic protocol will require a `v` bump
 
-This means that Data Recipients can always recognize a SHLink Payload and display its label to the user. If a Data Recipient does not recognize and support the `v` in a SHLink Payload, it SHOULD display an appropriate message to the user and SHOULD NOT proceed with a manifest request, unless it has some reason to believe that proceeding is safe.
+This means that Data Recipients can always recognize a SHLink Payload and display its label to the user. If a Data Recipient receives a SHLink with a `v` newer than what it supports, it SHOULD display an appropriate message to the user and SHOULD NOT proceed with a manifest request, unless it has some reason to believe that proceeding is safe.
 :::
 
 :::info
