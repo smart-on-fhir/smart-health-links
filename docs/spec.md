@@ -87,7 +87,7 @@ Implementations can rely on the following behaviors:
   * Data Recipients SHALL ignore properties they don't recognize
   * Introduction of properties that can't safely be ignored will require a `v` bump
 * SHLink Payload flags
-  * New flag values MAY be introduced without a version bump, as long as they're safe to ignore
+  * New flag values MAY be introduced without a version bump, as long as they're safe to ignore. For example, the v1 flag `L` is safe to ignore because the client will still be able to handle a one-time manifest request. The `P` flag however cannot be ignored because the server will respond with an error if no passcode is provided.
   * Data Recipients SHALL ignore flag values they don't recognize
   * Introduction of new flag values that can't safely be ignored will require a `v` bump
 * Manifest URL request/response
