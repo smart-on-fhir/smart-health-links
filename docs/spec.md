@@ -91,8 +91,8 @@ Implementations can rely on the following behaviors:
   * Data Recipients SHALL ignore flag values they don't recognize
   * Introduction of new flag values that can't safely be ignored will require a `v` bump
 * Manifest URL request/response
-  * New request parameters or headers MAY be introducd without a version bump, as long as they're optional and safe to ignore
-  * New response parameters or headers MAY be introducd without a version bump, as long as they're optional and safe to ignore
+  * New request parameters or headers MAY be introduced without a version bump, as long as they're optional and safe to ignore, or gated by a flag or property in the SHL Payload
+  * New response parameters or headers MAY be introduced without a version bump, as long as they're optional and safe to ignore, or gated by a request parameter
   * Data Sharers and Recipients SHALL ignore parameters and headers they don't recognize
   * Introduction of parameters or headers that can't safely be ignored will require a `v` bump
 * Encryption and signature schemes
