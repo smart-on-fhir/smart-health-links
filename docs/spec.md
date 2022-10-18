@@ -65,11 +65,41 @@ The SHLink Payload is a JSON object including the following properties:
 * `label`: Optional.  String no longer than 80 characters that provides a short description of the data behind the SHLink. 
 * `v`: Optional. Integer representing the SHLinks protocol version this SHLink conforms to. MAY be omitted when the default value (`1`) applies.
 
+
 The JSON Payload is then:
 * Minified
 * Base64urlencoded
 * Prefixed with `shlink:/`
 * Optionally prefixed with a viewer URL that ends with `#`
+
+
+**:notebook: Design Note: Protocol Versioning**
+
+Implementations can rely on the following behaviors:
+
+* SHLink Payload processing for `shlink:` URIs
+  * SHLink Payloads SHALL be constructed as per `"v":1` (i.e., payloads are Base64urlencoded, minified JSON objects)
+    * Any changes to this design will require a new URI scheme, rather than a `v` bump
+* SHLink Payload stability
+  * `.label`, `.exp`, and `.flag` SHALL always work as defined for `"v":1`
+    * Any changes to this design will require a new URI scheme, rather than a `v` bump
+  * New properties MAY be introduced without a version bump, as long as they're optional and safe to ignore
+  * Data Recipients SHALL ignore properties they don't recognize
+  * Introduction of properties that can't safely be ignored will require a `v` bump
+* SHLink Payload flags
+  * New flag values MAY be introduced without a version bump, as long as they're safe to ignore. For example, the v1 flag `L` is safe to ignore because the client will still be able to handle a one-time manifest request. The `P` flag however cannot be ignored because the server will respond with an error if no passcode is provided.
+  * Data Recipients SHALL ignore flag values they don't recognize
+  * Introduction of new flag values that can't safely be ignored will require a `v` bump
+* Manifest URL request/response
+  * New request parameters or headers MAY be introduced without a version bump, as long as they're optional and safe to ignore, or gated by a flag or property in the SHL Payload
+  * New response parameters or headers MAY be introduced without a version bump, as long as they're optional and safe to ignore, or gated by a request parameter
+  * Data Sharers and Recipients SHALL ignore parameters and headers they don't recognize
+  * Introduction of parameters or headers that can't safely be ignored will require a `v` bump
+* Encryption and signature schemes
+  * Changes to the cryptographic protocol will require a `v` bump
+
+This means that Data Recipients can always recognize a SHLink Payload and display its label to the user. If a Data Recipient receives a SHLink with a `v` newer than what it supports, it SHOULD display an appropriate message to the user and SHOULD NOT proceed with a manifest request, unless it has some reason to believe that proceeding is safe.
+:::
 
 :::info
 
