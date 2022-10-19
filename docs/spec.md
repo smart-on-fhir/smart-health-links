@@ -6,17 +6,20 @@ sidebar_position: 2
 
 #### Actors
 
-* **Data Sharer**. Person who decides to share health data
-* **Data Recipient**. Person or organization responsible for receiving health data
+* Software Tools
+  * **SHL Management Tool**. Helps users creates, manage, and share SHLinks.
+  * **SHL Receiving Tool**. Helps users receive SHLinks and work with associated content.
+* Users
+  * **Sharing User**. An individual working with a SHL Management Tool to create/manage/share information
+  * **Receiving User**. An individual working with a SHL Receiving tool to retrieve/display/use information
 
+## Pre-protocol step: Sharing User configures a new SHLink
 
-## Pre-protocol step: Data Sharer Configures a new SHLink
+Working with a SHL Management Tool, the Sharing User makes a few decisions up front:
 
-The Data Sharer makes a few decisions at configuration time:
-
-* **What to share**. Depending on the Data Sharer's software, this could be an explicit set of files or a "sharing policy" that matches different data over time.
-* **Whether the SHLink will require a Passcode** to access. Depending on the Data Sharer's software, a Passcode may be mandatory.
-* **Whether the SHLink will expire** at some pre-specified time. Depending on the Data Sharer's software, an expiration time may be mandatory.
+* **What to share**. Depending on the SHL Management Tool, the Sharing User might explicitly choose a set of files or define a "sharing policy" that matches different data over time.
+* **Whether the SHLink will require a Passcode** to access. Depending on the SHL Management Tool, a Passcode may be mandatory.
+* **Whether the SHLink will expire** at some pre-specified time. Depending on the SHL Management Tool, an expiration time may be mandatory.
 
 Regarding "what to share": a single SHLink at a specific point in time will *resolve* to a manifest of files of the following types:
 * `application/smart-health-card`: a JSON file with a `.verifiableCredential` array containing SMART Health Card JWS strings, as specified by https://spec.smarthealth.cards#via-file-download.
@@ -25,32 +28,31 @@ Regarding "what to share": a single SHLink at a specific point in time will *res
   * `aud` Required string indicating the FHIR Server Base URL where this token can be used (e.g.,  ``"https://server.example.org/fhir"``)
   * `query`: Optional array of strings acting as hints to the client, indicating queries it might want to make (e.g., `["Coverage?patient=123&_tag=family-insurance"]`)
 
-
-At configuration time, the Data Sharer's software SHALL generate (or obtain from the Resource Server) a random key used for encrypting/decrypting the files in the manifest (see ["Decryption"](#Encrypting-and-Decrypting-Files)). 
+At configuration time, the SHL Management Tool SHALL generate a random key used for encrypting/decrypting the files in the manifest (see ["Decryption"](#Encrypting-and-Decrypting-Files)). 
 
 :::info 
 **:notebook:   Design Note (trust and encryption)**
 
-*This pattern of encrypting files allows for deployment scenarios where the Resource Server is not trusted to know the information inside of the manifest's files. In such scenarios, the Data Sharer and Data Recipient can treat the Resource Server as a blind intermediary. That said: in many deployment scenarios the Resource Server will be hosted by a healthcare provider or other entity that already has access to such files. For consistency, this protocol always applies encryption.*
+*This pattern of encrypting files allows for deployment scenarios where the file server is not trusted to know the information inside the manifest's files. In such scenarios, the Sharing User and Receiving User can treat the server as a blind intermediary. That said: in many deployment scenarios, the file server will be hosted by a healthcare provider or other entity that already has access to such files. For consistency, this protocol always applies encryption.*
 :::
 
 :::info
-**:notebook:   Design Note (Data Sharer "internals")**
+**:notebook:   Design Note (SHL Management Tool "internals")**
 
-*We do not standardize the protocol by which the Data Sharer's local software communicates with the Resource Server. These may be provided by the same vendor and use internal APIs to communicate -- or there may be no "local" software at all.*
+*We do not standardize the protocol by which the SHL Management Tool's local software communicates with its server-side components. These may be provided by the same vendor and use internal APIs to communicate -- or there may be no "local" software at all.*
 :::
 
-## Data Sharer Generates a SHLink URI
+## SHL Management Tool Generates a SHLink URI
 
 ### Establish a SHLink Manifest URL
 
-Based the configuration from (1), the resource server generates a "manifest URL" for the new SHLink. The manifest URL:
+Based the configuration from (1), the SHL Management Tool generates a "manifest URL" for the new SHLink. The manifest URL:
 
 * SHALL include at least **256 bits of entropy**
     * A suggested approach is to generate a cryptographically strong 32-byte random sequence and then base64url-encode this sequence to obtain a 43-character string that is used as a path segment. For example: `https://shl.example.org/manifests/I91rhba3VsuGXGchcnr6VHlQFKxfE28kuZ0ssbEuxno/manifest.json`
 * SHALL NOT exceed **128 characters** in length (note, this maximum applies to the `url` field of the SHLink Payload, not to the entire SHLink URI).
 
-The Data Sharer's software incorporates the manifest URL into a SHLink as follows:
+The SHL Management Tool incorporates the manifest URL into a SHLink as described below.
 
 ### Construct a SHLink Payload
 
@@ -58,7 +60,7 @@ The SHLink Payload is a JSON object including the following properties:
 
 * `url`: Manifest URL for this SHLink
 * `key`: Decryption key for processing files returned in the manifest. 43 characters, consisting of 32 random bytes base64urlencoded.
-* `exp`: Optional. Number representing expiration time in Epoch seconds, as a hint to help the Data Recipient determine if this QR is stale. (Note: epoch times should be parsed into 64-bit numeric types.)
+* `exp`: Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Tool determine if this QR is stale. (Note: epoch times should be parsed into 64-bit numeric types.)
 * `flag`: Optional. String created by concatenating single-character flags in alphabetical order
   * `L` Indicates the SHLink is intended for long-term use and manifest content can evolve over time 
   * `P` Indicates the SHLink requires a Passcode to resolve
@@ -73,6 +75,8 @@ The JSON Payload is then:
 * Optionally prefixed with a viewer URL that ends with `#`
 
 
+:::info
+
 **:notebook: Design Note: Protocol Versioning**
 
 Implementations can rely on the following behaviors:
@@ -84,21 +88,21 @@ Implementations can rely on the following behaviors:
   * `.label`, `.exp`, and `.flag` SHALL always work as defined for `"v":1`
     * Any changes to this design will require a new URI scheme, rather than a `v` bump
   * New properties MAY be introduced without a version bump, as long as they're optional and safe to ignore
-  * Data Recipients SHALL ignore properties they don't recognize
+  * SHL Receiving Tool SHALL ignore properties they don't recognize
   * Introduction of properties that can't safely be ignored will require a `v` bump
 * SHLink Payload flags
   * New flag values MAY be introduced without a version bump, as long as they're safe to ignore. For example, the v1 flag `L` is safe to ignore because the client will still be able to handle a one-time manifest request. The `P` flag however cannot be ignored because the server will respond with an error if no passcode is provided.
-  * Data Recipients SHALL ignore flag values they don't recognize
+  * SHL Receiver Tools SHALL ignore flag values they don't recognize
   * Introduction of new flag values that can't safely be ignored will require a `v` bump
 * Manifest URL request/response
   * New request parameters or headers MAY be introduced without a version bump, as long as they're optional and safe to ignore, or gated by a flag or property in the SHL Payload
   * New response parameters or headers MAY be introduced without a version bump, as long as they're optional and safe to ignore, or gated by a request parameter
-  * Data Sharers and Recipients SHALL ignore parameters and headers they don't recognize
+  * SHL Management Tools and SHL Receiving Tools SHALL ignore parameters and headers they don't recognize
   * Introduction of parameters or headers that can't safely be ignored will require a `v` bump
 * Encryption and signature schemes
   * Changes to the cryptographic protocol will require a `v` bump
 
-This means that Data Recipients can always recognize a SHLink Payload and display its label to the user. If a Data Recipient receives a SHLink with a `v` newer than what it supports, it SHOULD display an appropriate message to the user and SHOULD NOT proceed with a manifest request, unless it has some reason to believe that proceeding is safe.
+This means that SHL Receiver Tools can always recognize a SHLink Payload and display its label to the user. If a SHL Receiver Tool receives a SHLink with a `v` newer than what it supports, it SHOULD display an appropriate message to the user and SHOULD NOT proceed with a manifest request, unless it has some reason to believe that proceeding is safe.
 :::
 
 :::info
@@ -109,7 +113,7 @@ This means that Data Recipients can always recognize a SHLink Payload and displa
 :::
 
 The following optional step may occur sometime after a SHLink is generated:
-* **Optional: Update Shared Files**. For some sharing scenarios, the Data Sharer MAY update the shared files from time to time (e.g., when new lab results arrive or new immunizations are performed). Updated versions SHALL be encrypted using the same key as the initial version. 
+* **Optional: Update Shared Files**. For some sharing scenarios, Sharing User MAY update the shared files from time to time (e.g., when new lab results arrive or new immunizations are performed). Updated versions SHALL be encrypted using the same key as the initial version. 
 
 
 ###### Example SHLink Generation
@@ -133,9 +137,9 @@ const shlink = `https://viewer.example.org#` + shlinkBare
 // "https://viewer.example.org#shlink:/eyJ1cmwiOiJodHRwczovL2Voci5leGFtcGxlLm9yZy9xci9ZOXh3a1VkdG1OOXd3b0pvTjNmZkpJaFgyVUd2Q0wxSm5sUFZOTDNrRFdNL20iLCJmbGFnIjoiTFAiLCJrZXkiOiJyeFRnWWxPYUtKUEZ0Y0VkMHFjY2VOOHdFVTRwOTRTcUF3SVdRZTZ1WDdRIiwibGFiZWwiOiJCYWNrLXRvLXNjaG9vbCBpbW11bml6YXRpb25zIGZvciBPbGl2ZXIgQnJvd24ifQ"
 ```
 
-## Data Sharer transmits a SHLink
+##  Sharing User transmits a SHLink
 
-The Data Sharer can convey a SHLink by any common means including e-mail, secure messaging, or other text-based communication channels. When presenting a SHLink in person, the Data Sharer can also display the link as a QR code using any standard library to create a QR image from the SHLink URI. 
+The Sharing User can convey a SHLink by any common means including e-mail, secure messaging, or other text-based communication channels. When presenting a SHLink in person, the Sharing User can also display the link as a QR code using any standard library to create a QR image from the SHLink URI. 
 
 When sharing a SHLink via QR code, the following recommendations apply:
 
@@ -143,26 +147,26 @@ When sharing a SHLink via QR code, the following recommendations apply:
 * Include the [SMART Logo](https://demo.vaxx.link/smart-logo.svg) on a white background over the center of the QR, scaled to occupy 15% of the image area
 
 
-## Data Recipient processes a SHLink
+## SHL Receiving Tool processes a SHLink
 
-The Data Recipient can process a SHLink using the following steps.
+The SHL Receiving Tool can process a SHLink using the following steps.
 
 * Decode the SHLink JSON payload
 * Issue a [SHLink Manifest Request](#shlink-manifest-request) to payload's `url`
 * Decrypt and process files from the manifest
-* Optional:  When the original QR includes the `L` flag for long-term use, the Data Recipient can re-fetch the manifest periodically, following [polling guidance](#polling-manifest-for-changes) to avoid issing too many requests
+* Optional:  When the original QR includes the `L` flag for long-term use, the SHL Receiving Tool can re-fetch the manifest periodically, following [polling guidance](#polling-manifest-for-changes) to avoid issing too many requests
  
 ---
 
 ## SHLink Manifest Request
 
-The Data recipient SHALL retrieve a SHLink's manifest by issuing a request to the `url` in the SHLink payload, with:
+The SHL Receiving Tool SHALL retrieve a SHLink's manifest by issuing a request to the `url` in the SHLink payload, with:
 
 * Method: `POST`
 * Headers:
   * `content-type: application/json`
 * Body: JSON object including
-  * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Data Sharer
+  * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Receiving User
   * `passcode`: Conditional. SHALL be populated with a user-supplied Passcode if the `P` flag was present in the SHLink payload
   * `embeddedLengthMax`: Optional. Integer upper bound on the length of embedded payloads (see [`.files.embedded`](#filesembedded-content))
 
@@ -204,14 +208,14 @@ SHALL wait before re-issuing a manifest request.
 
 ###  `.files.location` links
 
-The Data Sharer SHALL ensure that `.files.location` links can be dereferenced
+The Sharing User SHALL ensure that `.files.location` links can be dereferenced
 without additional authentication, and that they are short-lived. The lifetime
-of `.files.location` links SHALL NOT exceed one hour. The Data Sharer MAY create
+of `.files.location` links SHALL NOT exceed one hour. The Sharing User MAY create
 one-time-use `.files.location` links that are consumed as soon as they are
 dereferenced.
 
-The Data Recipient SHALL treat any manifest file locations as short-lived and
-potentially limited to one-time use. The Data Recipient SHALL NOT attempt to
+The SHL Receiving Tool SHALL treat any manifest file locations as short-lived and
+potentially limited to one-time use. The SHL Receiving Tool SHALL NOT attempt to
 dereference a manifest's `.files.location` link more than one hour after
 requesting the manifest, and SHALL be capable of re-fetching the manifest to
 obtain fresh `location` links in the event that they have expired or been
@@ -311,11 +315,11 @@ const decoded = JSON.parse(new TextDecoder().decode(decrypted.plaintext));
 
 While the SMART Health Links spec focuses on providing access to structured data, it's often
 useful to share an interactive experience such as a web-based diagnostic portal where the
-SHL Data Recipient can review and add comments to a patient record. This can be accomplished
+SHL Receiving Tool can review and add comments to a patient record. This can be accomplished
 in SHL with a manifest entry of type `application/fhir+json` that provides a
 [FHIR Endpoint resource](https://hl7.org/fhir/endpoint.html) where:
 
-* `name` describes the interactive experience with sufficient detail for the SHL Recipient to decide whether to engage
+* `name` describes the interactive experience with sufficient detail for the SHL Receiving Tool to decide whether to engage
 * `connectionType` is `{"system": "https://smarthealthit.org", "code": "shl-interactive-experience"}`
 * `address` is the URI for the interactive experience
 * `period` optionally documents the window of time when the interactive experience is available
@@ -353,7 +357,7 @@ to help establish a consumer-mediated SMART on FHIR connection to the data sourc
 accomplished with a SHL manifest entry of type `application/fhir+json` that provides a
 [FHIR Endpoint resource](https://hl7.org/fhir/endpoint.html) where:
 
-* `name` describes the SMART on FHIR endpoint with sufficient detail for the SHL Recipient to decide whether to connect
+* `name` describes the SMART on FHIR endpoint with sufficient detail for the SHL Receiving Tool to decide whether to connect
 * `connectionType` is `{"system": "http://terminology.hl7.org/CodeSystem/restful-security-service", "code": "SMART-on-FHIR"}`
 * `address` is the FHIR API base URL of the server that supports [SMART App Launch](http://hl7.org/fhir/smart-app-launch/)
 
