@@ -208,9 +208,9 @@ SHALL wait before re-issuing a manifest request.
 
 ###  `.files.location` links
 
-The Sharing User SHALL ensure that `.files.location` links can be dereferenced
+The SHL Management Tool SHALL ensure that `.files.location` links can be dereferenced
 without additional authentication, and that they are short-lived. The lifetime
-of `.files.location` links SHALL NOT exceed one hour. The Sharing User MAY create
+of `.files.location` links SHALL NOT exceed one hour. The SHL Management Tool MAY create
 one-time-use `.files.location` links that are consumed as soon as they are
 dereferenced.
 
