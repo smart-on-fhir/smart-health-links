@@ -31,13 +31,13 @@ Regarding "what to share": a single SHLink at a specific point in time will *res
 At configuration time, the SHL Sharing Application SHALL generate a random key used for encrypting/decrypting the files in the manifest (see ["Decryption"](#Encrypting-and-Decrypting-Files)). 
 
 :::info 
-**:notebook:   Design Note (trust and encryption)**
+**:notebook:   Design Note: Trust and encryption**
 
 *This pattern of encrypting files allows for deployment scenarios where the file server is not trusted to know the information inside the manifest's files. In such scenarios, the Sharing User and Receiving User can consider the server  a blind intermediary. That said: in many deployment scenarios, the file server will be hosted by a healthcare provider or other entity that already has access to such files. For consistency, this protocol always applies encryption.*
 :::
 
 :::info
-**:notebook:   Design Note (SHL Sharing Application "internals")**
+**:notebook:   Design Note: SHL Sharing Application "internals"**
 
 *We do not standardize the protocol by which the SHL Sharing Application's local software communicates with its server-side components. These may be provided by the same vendor and use internal APIs to communicate -- or there may be no "local" software at all.*
 :::
@@ -201,7 +201,7 @@ Requests` and a `Retry-After` header indicating the minimum time that a client
 SHALL wait before re-issuing a manifest request.
 
 :::info
-**:notebook: Design Note (Rate Limiting)**
+**:notebook: Design Note: Rate Limiting**
 *More detailed guidance on polling will require real-world implementation experience. The current guidance provides the client a hint about how often to poll, and provides a way to convey that requests are being issued too frequently. We encourage implementers to experiment with additional capabilities.*
 :::
 
