@@ -7,11 +7,11 @@ sidebar_position: 2
 #### Actors
 
 * Software Applications
-  * **SHL Sharing Application**. Helps users creates, manage, and share SHLinks. Also referred to below as "client".
-  * **SHL Receiving Application**. Helps users receive SHLinks and work with associated content. Also referred to below as "server".
+  * **SHL Sharing Application**. Helps users creates, manage, and share SHLinks. Also referred to below as "server". This application can include local software as well as server-side components.
+  * **SHL Receiving Application**. Helps users receive SHLinks and work with associated content. Also referred to below as "client".
 * Users
   * **Sharing User**. An individual working with a SHL Sharing Application to create/manage/share information
-  * **Receiving User**. An individual working with a SHL Receiving tool to retrieve/display/use information
+  * **Receiving User**. An individual working with a SHL Receiving Application to retrieve/display/use information. In autonmous use cases there may be no Receiving User.
 
 ## Pre-protocol step: Sharing User configures a new SHLink
 
