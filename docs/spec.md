@@ -143,8 +143,8 @@ The Sharing User can convey a SHLink by any common means including e-mail, secur
 
 When sharing a SHLink via QR code, the following recommendations apply:
 
-* Create the QR with Error Correction Level Q
-* Include the [SMART Logo](https://demo.vaxx.link/smart-logo.svg) on a white background over the center of the QR, scaled to occupy 5-7% of the image area (inclusive of the "quiet zone" QR border).
+* Create the QR with Error Correction Level M
+* Include the [SMART Logo](https://demo.vaxx.link/smart-logo.svg) on a white background over the center of the QR, scaled to occupy 5-6% of the image area (inclusive of the "quiet zone" QR border).
 
 
 ## SHL Receiving Application processes a SHLink
