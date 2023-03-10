@@ -64,6 +64,7 @@ The SHLink Payload is a JSON object including the following properties:
 * `flag`: Optional. String created by concatenating single-character flags in alphabetical order
   * `L` Indicates the SHLink is intended for long-term use and manifest content can evolve over time 
   * `P` Indicates the SHLink requires a Passcode to resolve
+  * `U` Indicates the SHLink's `url` resolves to a single encrypted file accessible via `GET`, bypassing the manifest. SHALL NOT be used in combination with `P`.
 * `label`: Optional.  String no longer than 80 characters that provides a short description of the data behind the SHLink. 
 * `v`: Optional. Integer representing the SHLinks protocol version this SHLink conforms to. MAY be omitted when the default value (`1`) applies.
 
@@ -157,10 +158,9 @@ The SHL Receiving Application can process a SHLink using the following steps.
 * Optional:  When the original QR includes the `L` flag for long-term use, the SHL Receiving Application can re-fetch the manifest periodically, following [polling guidance](#polling-manifest-for-changes) to avoid issing too many requests
  
 ---
-
 ## SHLink Manifest Request
 
-The SHL Receiving Application SHALL retrieve a SHLink's manifest by issuing a request to the `url` in the SHLink payload, with:
+When no `U` flag is present, the SHL Receiving Application SHALL retrieve a SHLink's manifest by issuing a request to the `url` with:
 
 * Method: `POST`
 * Headers:
@@ -251,6 +251,15 @@ the sever SHALL NOT embedded payload longer than the client-designated maximum.
   }]
 }
 ```
+
+## SHLink Direct File Request (with `U` Flag)
+
+When the `U` flag is present, the SHL Receiving Application SHALL retrieve a SHLink's sole encrypted file by issuing a request to the `url` with:
+
+* Method: `GET`
+    * Query parameters
+        * `recipient`: Required. A string describing the recipient (e.g.,the name of an organization or person) suitable for display to the Data Sharer
+
 
 ## Encrypting and Decrypting Files
 
