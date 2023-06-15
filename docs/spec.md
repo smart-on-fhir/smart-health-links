@@ -214,7 +214,7 @@ of `.files.location` links SHALL NOT exceed one hour. The SHL Sharing Applicatio
 one-time-use `.files.location` links that are consumed as soon as they are
 dereferenced.
 
-The SHL Receiving Application SHALL treat any manifest file locations as short-lived and
+Because the manifest and associated files are a single package that may change over time, the SHL Receiving Application SHALL treat any manifest file locations as short-lived and
 potentially limited to one-time use. The SHL Receiving Application SHALL NOT attempt to
 dereference a manifest's `.files.location` link more than one hour after
 requesting the manifest, and SHALL be capable of re-fetching the manifest to
