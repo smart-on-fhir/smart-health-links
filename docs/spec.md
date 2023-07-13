@@ -176,6 +176,12 @@ If an invalid Passcode is supplied, the Resource Server SHALL reject the request
 
 * `remainingAttempts`: number of attempts remaining before the SHL is disabled
 
+
+:::info
+**:notebook: Design Note: Monitoring remaining attempts**
+Servers need to enforce a total lifetime count of incorrect Passcodes even in the face of attacks that attempt multiple Passcodes in separate, parallel HTTP requests (i.e., with little or no delay between requests). For example, servers might employ measures to limit the number of in-flight requests for a single SHLink at any given time, ensuring that requests are processed serially through the use of synchronization or shared state.
+:::
+
 If the SHlink request is valid, the Resource Server SHALL return a  SHLink Manifest File with `content-type: application/json`. The SHLink Manifest File is a JSON file with a `files` array where each entry includes:
 
 * `contentType`: One of  the following values:
@@ -184,11 +190,10 @@ If the SHlink request is valid, the Resource Server SHALL return a  SHLink Manif
     *  `"application/fhir+json"`
 * `location` (SHALL be present if no `embedded` content is included): URL to the file.
 This URL SHALL be short-lived and intended for single use. For example, it could be a
-short-lifetime signed URL to a file hosted in a cloud storage service.
+short-lifetime signed URL to a file hosted in a cloud storage service (see signed URL docs for [S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html), [Azure](https://learn.microsoft.com/en-us/rest/api/storageservices/create-service-sas), and [GCP](https://cloud.google.com/storage/docs/access-control/signed-urls)).
 * `embedded` (SHALL be present if no `location` is included): JSON string directly
 embedding the encrypted contents of the file as a compact JSON Web Encryption
 string (see ["Encrypting"](#encrypting-and-decrypting-files)).
-
 
 ### Polling manifest for changes
 When the original QR includes the `L` flag for long-term use, the client MAY
