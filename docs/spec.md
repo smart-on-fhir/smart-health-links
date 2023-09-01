@@ -182,7 +182,7 @@ If an invalid Passcode is supplied, the Resource Server SHALL reject the request
 Servers need to enforce a total lifetime count of incorrect Passcodes even in the face of attacks that attempt multiple Passcodes in separate, parallel HTTP requests (i.e., with little or no delay between requests). For example, servers might employ measures to limit the number of in-flight requests for a single SHLink at any given time, ensuring that requests are processed serially through the use of synchronization or shared state.
 :::
 
-If the SHlink request is valid, the Resource Server SHALL return a  SHLink Manifest File with `content-type: application/json`. The SHLink Manifest File is a JSON file with a `files` array where each entry includes:
+If the SHlink request is valid, the Resource Server SHALL return a  SHLink Manifest File with `content-type: application/json`. The SHLink Manifest File is a JSON object with a `files` array where each entry includes:
 
 * `contentType`: One of  the following values:
     * `"application/smart-health-card"` or
@@ -226,6 +226,12 @@ requesting the manifest, and SHALL be capable of re-fetching the manifest to
 obtain fresh `location` links in the event that they have expired or been
 consumed.
 
+The SHL Sharing Application SHALL respond to the `GET` requests for `.files.location` URLs with:
+
+* Headers:
+  * `content-type: application/jose`
+* Body: JSON Web Encryption as described in <a href="#encrypting-and-decrypting-files">Encrypting and Decrypting Files</a>.
+
 ### `.files.embedded` content
 
 If the client has specified `embeddedLengthMax` in the manifest request, the sever SHALL NOT
@@ -234,6 +240,8 @@ embedded payload longer than the client-designated maximum.
 If present, the `embedded` value SHALL be up-to-date as of the time the manifest is
 requested. If the client has specified `embeddedLengthMax` in the manifest request,
 the sever SHALL NOT embedded payload longer than the client-designated maximum.
+
+The embedded content is a JSON Web Encryption as described in <a href="#encrypting-and-decrypting-files">Encrypting and Decrypting Files</a>.
 
 ---
 
