@@ -267,7 +267,7 @@ The embedded content is a JSON Web Encryption as described in <a href="#encrypti
 
 ## SHLink Direct File Request (with `U` Flag)
 
-When the `U` flag is present, the SHL Receiving Application SHALL retrieve a SHLink's sole encrypted file by issuing a request to the `url` with:
+When the `U` flag is present, the SHL Receiving Application SHALL NOT make a request for the manifest. Instead, the application SHALL retrieve a SHLink's sole encrypted file by issuing a request to the `url` with:
 
 * Method: `GET`
     * Query parameters
