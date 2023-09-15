@@ -182,7 +182,7 @@ If an invalid Passcode is supplied, the Resource Server SHALL reject the request
 Servers need to enforce a total lifetime count of incorrect Passcodes even in the face of attacks that attempt multiple Passcodes in separate, parallel HTTP requests (i.e., with little or no delay between requests). For example, servers might employ measures to limit the number of in-flight requests for a single SHLink at any given time, ensuring that requests are processed serially through the use of synchronization or shared state.
 :::
 
-If the SHlink request is valid, the Resource Server SHALL return a  SHLink Manifest File with `content-type: application/json`. The SHLink Manifest File is a JSON file with a `files` array where each entry includes:
+If the SHlink request is valid, the Resource Server SHALL return a  SHLink Manifest File with `content-type: application/json`. The SHLink Manifest File is a JSON object with a `files` array where each entry includes:
 
 * `contentType`: One of  the following values:
     * `"application/smart-health-card"` or
@@ -226,6 +226,12 @@ requesting the manifest, and SHALL be capable of re-fetching the manifest to
 obtain fresh `location` links in the event that they have expired or been
 consumed.
 
+The SHL Sharing Application SHALL respond to the `GET` requests for `.files.location` URLs with:
+
+* Headers:
+  * `content-type: application/jose`
+* Body: JSON Web Encryption as described in <a href="#encrypting-and-decrypting-files">Encrypting and Decrypting Files</a>.
+
 ### `.files.embedded` content
 
 If the client has specified `embeddedLengthMax` in the manifest request, the sever SHALL NOT
@@ -234,6 +240,8 @@ embedded payload longer than the client-designated maximum.
 If present, the `embedded` value SHALL be up-to-date as of the time the manifest is
 requested. If the client has specified `embeddedLengthMax` in the manifest request,
 the sever SHALL NOT embedded payload longer than the client-designated maximum.
+
+The embedded content is a JSON Web Encryption as described in <a href="#encrypting-and-decrypting-files">Encrypting and Decrypting Files</a>.
 
 ---
 
@@ -259,7 +267,7 @@ the sever SHALL NOT embedded payload longer than the client-designated maximum.
 
 ## SHLink Direct File Request (with `U` Flag)
 
-When the `U` flag is present, the SHL Receiving Application SHALL retrieve a SHLink's sole encrypted file by issuing a request to the `url` with:
+When the `U` flag is present, the SHL Receiving Application SHALL NOT make a request for the manifest. Instead, the application SHALL retrieve a SHLink's sole encrypted file by issuing a request to the `url` with:
 
 * Method: `GET`
     * Query parameters
@@ -268,7 +276,7 @@ When the `U` flag is present, the SHL Receiving Application SHALL retrieve a SHL
 
 ## Encrypting and Decrypting Files
 
-SHLink files are always symmetrically encrypted with a SHLink-specific key. Encryption is performed using JOSE JWE compact serialization with `"alg": "dir"` and `"enc": "A256GCM"`.
+SHLink files are always symmetrically encrypted with a SHLink-specific key. Encryption is performed using JSON Web Encryption (JOSE JWE) compact serialization with `"alg": "dir"`, `"enc": "A256GCM"`, and a `cty` header indicating the content type of the payload (e.g., `application/smart-health-card`, `application/fhir+json`, etc).
 
 ##### Example Encryption
 
@@ -277,6 +285,7 @@ import * as jose from 'https://deno.land/x/jose@v4.7.0/index.ts'
 
 const exampleShcFromWeb = await fetch("https://spec.smarthealth.cards/examples/example-00-e-file.smart-health-card");
 const exampleShcBody = new Uint8Array(await exampleShcFromWeb.arrayBuffer());
+const exampleContentType = 'application/smart-health-card'
 
 const shlinkPayload =  {
   "key": "rxTgYlOaKJPFtcEd0qcceN8wEU4p94SqAwIWQe6uX7Q",
@@ -287,12 +296,13 @@ const encrypted = await new jose
   .CompactEncrypt(new Uint8Array(exampleShcBody))
   .setProtectedHeader({
     alg: 'dir',
-    enc: 'A256GCM'
+    enc: 'A256GCM',
+    cty: exampleContentType,
   })
   .encrypt(jose.base64url.decode(shlinkPayload.key));
-// "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..8zH0NmUXGwMOqEya.xdGRpgyvE9vNoKzHlr4itKKW2von-aW1Feu3iSKv4S6wccXhLHW02e_Opi8hG4ma--gFCj-xv8KIisbQEmUJjxb_dZQhCpi2H5Qh-S_Ko5lUFlzC6y5blJNAEtB4Aflcnknhvn9x_2ygi7nOFkFYUKgLDU2wjXxn0g_M23lSjpnfIUdKw9nhRXPp6j55HpJT_mZGn8_fYjnqZ7zV-iVu4AIGlIs_dBYoKqVIHxjr-Is0jLK8KQ68iQcsRLxCpTZnoaeJCvJ0aW69J8-7Ndr87gbUG56CduCZPfl0USPerA4RphKd1PbYjkkbOR53sb-khs-XZgVZKHJwXmoF7G50-chmuSEFcB4w9l4w_rNbnze8DjYusuF8kBUI75Ms10ss4WoBINt7nHpiipZH0XJE0btyKC8Ew0tqqrWxJPcdQrKzQdiyv3-SgHH3_UjzwcIc2KmsP33wpViQ1BCXqwhA5njWzwWFHOZ1aQ_7gbO_Xwqc6tRx2fvVu8dTfU30HtTff__xlnQIu1gGA9bIdlO0fp6mPcZdGl_tUkjweVxX5QdddIASY1AUGg9uAi4FCdCtnWVwIgq1e9cRrqPhLC-LjOHys_ihx_Taj_53uFVh0skoQeVV132X04N1p5MPFZz0G-2OIsUQudCH5jmx0Ca0tSESYdhAnBxNHFLNJ-Dl3aW0HdRJxJuGtY0nAquwoBa2_sUkhx1Qe6ghy0khddpa9cgbbULde9gawjxe3O04K00eD9-6dxzLSNhARPO_Zs98O9L8ngoW8Mppbif43vP9SkRUwqjeiWVU_wHK55VpZYCba5owG8FIZEH3khk9DpYk_pLRwztRpN0Q2jY2BqbTXn3eD-shGucKMiY4hqzaJTd7Wwx8eRghITDtY_BbfKV0PsxbT2gIb4oaXwuXgfifUqXEsK8e4zDoc6MU62ABEoqlG_CwpkhJBg-69dXTXkiE7VapPs4TjxvxHu7Eg3dewtNKUuWRgCHht2cXD0C8if-mOltaySZCgOnrSXRJJE0Pf8gEMHZTwf0bx4XdMGydT5vmcAspKmWscy_80VIvCb4muBNMWeJdrVhBKviLjd-GwqxfUK_HQN7kFF7ZDwlzvBxq.ek65P9quBJl0ze11WteQgA"
 
-```
+console.log(encrypted)
+//eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5IjoiYXBwbGljYXRpb24vc21hcnQtaGVhbHRoLWNhcmQifQ..B9Bd5AW751az-gEx.iah6mxLb5TQe2ZfCwEUs4R1t8WoP0mnFc-TUzN1NIyzUeDwJNOcxv4CY8wV6ys4Dicnr3IhqTvVU1RbR-4eq1GCd4g96faV8_0MbHwXzP246Tz9BDLhQ2zlAjYqvvCi_JuWdyWqGhKeWGX1XibNHFzzVT0FmYensfKF4o0uSeZWQDKVEEhzMSKuALMpUkfwHcmCRfLT-ctANSxq-Zj0IIeT66XbztOomStjlfi-F-FaqBGZfHOARCVvT143CTYELLJCUdD4qUVkrNuLmRZrNuqVpY0g5BjABswkIoDmyoRJAEohuZCamZNA--p-uRqJjRefED1eMrKSppabV2ugaqoFlieujTOE-a3VKib9aC-lFsmLalkwh9ctr_FZqS9H46rqGjGcOxtAXalo1jkMPGupVsE1W-xIH14wbPCYcgfldH9SH7X60462kxD8OFdHpvnnfAvjQnaE4QDqasT5ySpBRtck4GVxs2IRBt62-kOlzoI8lHapLdwIms-Gdt7z38E47ZE3afE4IIbobPGz7wGvjbi3z234ARvGQ4jREgPQb1NRYAEtZlrZNzR6N7ofXD8jF502tw-QWI_Ox0jFP5tynIiMp-hG25ecQ0s4MzPHFC0ZABPamgg3MS-UILl76gMDCHS5Te_JAXZoC1HnkETw5M217SaG5ISAU0F5qETMREfTjZR9E45MDhnw7uY1vo2lffRB3ei1QqGuLh0gUnVU7TUfFYwcOqV15sb0t1lMj0mmyG5v-_dE9H6dYtRKJARltmdfSmc1HisBewx75Xh5ChJQ1hiCEDaZ1wqFjsFJ6SrKgJ7C1N7vx6QKx8YXwFH7ePG2qG39leT5JKZnqAvi9fqc6x-YwfhSjbRKGZoj2o55Fd2fbwtK6CXpiW6AekT7PUcl_7ynTq-DaQ_Yc29WwtmgapcCRNpfcMsoqCD4giu1V3Sj5DQLglwuk1gAMcuV5fo8JpABu2_is83WZ_GJ1WWMUxyZGq6u-EGuZrP96Yewb7-zfnt2lao_LJg1ef5cqDTW7-0MS27wkmLiIi0e-PYvS-UfWVHg1oNbR-MHXMVEQ6gqNg08IgEyPDSFCUbf75HuMILN80bQNtSlFj6FR7uNKHr8sigvKI80k.5flOKKmeqYm0TamwROr8Nw
 
 
 ##### Example Decryption
@@ -306,13 +316,16 @@ const shlinkPayload =  {
 };
 
 // Output from "encrypt" example above
-const fileEncrypted = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..8zH0NmUXGwMOqEya.xdGRpgyvE9vNoKzHlr4itKKW2von-aW1Feu3iSKv4S6wccXhLHW02e_Opi8hG4ma--gFCj-xv8KIisbQEmUJjxb_dZQhCpi2H5Qh-S_Ko5lUFlzC6y5blJNAEtB4Aflcnknhvn9x_2ygi7nOFkFYUKgLDU2wjXxn0g_M23lSjpnfIUdKw9nhRXPp6j55HpJT_mZGn8_fYjnqZ7zV-iVu4AIGlIs_dBYoKqVIHxjr-Is0jLK8KQ68iQcsRLxCpTZnoaeJCvJ0aW69J8-7Ndr87gbUG56CduCZPfl0USPerA4RphKd1PbYjkkbOR53sb-khs-XZgVZKHJwXmoF7G50-chmuSEFcB4w9l4w_rNbnze8DjYusuF8kBUI75Ms10ss4WoBINt7nHpiipZH0XJE0btyKC8Ew0tqqrWxJPcdQrKzQdiyv3-SgHH3_UjzwcIc2KmsP33wpViQ1BCXqwhA5njWzwWFHOZ1aQ_7gbO_Xwqc6tRx2fvVu8dTfU30HtTff__xlnQIu1gGA9bIdlO0fp6mPcZdGl_tUkjweVxX5QdddIASY1AUGg9uAi4FCdCtnWVwIgq1e9cRrqPhLC-LjOHys_ihx_Taj_53uFVh0skoQeVV132X04N1p5MPFZz0G-2OIsUQudCH5jmx0Ca0tSESYdhAnBxNHFLNJ-Dl3aW0HdRJxJuGtY0nAquwoBa2_sUkhx1Qe6ghy0khddpa9cgbbULde9gawjxe3O04K00eD9-6dxzLSNhARPO_Zs98O9L8ngoW8Mppbif43vP9SkRUwqjeiWVU_wHK55VpZYCba5owG8FIZEH3khk9DpYk_pLRwztRpN0Q2jY2BqbTXn3eD-shGucKMiY4hqzaJTd7Wwx8eRghITDtY_BbfKV0PsxbT2gIb4oaXwuXgfifUqXEsK8e4zDoc6MU62ABEoqlG_CwpkhJBg-69dXTXkiE7VapPs4TjxvxHu7Eg3dewtNKUuWRgCHht2cXD0C8if-mOltaySZCgOnrSXRJJE0Pf8gEMHZTwf0bx4XdMGydT5vmcAspKmWscy_80VIvCb4muBNMWeJdrVhBKviLjd-GwqxfUK_HQN7kFF7ZDwlzvBxq.ek65P9quBJl0ze11WteQgA" 
+const fileEncrypted = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiY3R5IjoiYXBwbGljYXRpb24vc21hcnQtaGVhbHRoLWNhcmQifQ..B9Bd5AW751az-gEx.iah6mxLb5TQe2ZfCwEUs4R1t8WoP0mnFc-TUzN1NIyzUeDwJNOcxv4CY8wV6ys4Dicnr3IhqTvVU1RbR-4eq1GCd4g96faV8_0MbHwXzP246Tz9BDLhQ2zlAjYqvvCi_JuWdyWqGhKeWGX1XibNHFzzVT0FmYensfKF4o0uSeZWQDKVEEhzMSKuALMpUkfwHcmCRfLT-ctANSxq-Zj0IIeT66XbztOomStjlfi-F-FaqBGZfHOARCVvT143CTYELLJCUdD4qUVkrNuLmRZrNuqVpY0g5BjABswkIoDmyoRJAEohuZCamZNA--p-uRqJjRefED1eMrKSppabV2ugaqoFlieujTOE-a3VKib9aC-lFsmLalkwh9ctr_FZqS9H46rqGjGcOxtAXalo1jkMPGupVsE1W-xIH14wbPCYcgfldH9SH7X60462kxD8OFdHpvnnfAvjQnaE4QDqasT5ySpBRtck4GVxs2IRBt62-kOlzoI8lHapLdwIms-Gdt7z38E47ZE3afE4IIbobPGz7wGvjbi3z234ARvGQ4jREgPQb1NRYAEtZlrZNzR6N7ofXD8jF502tw-QWI_Ox0jFP5tynIiMp-hG25ecQ0s4MzPHFC0ZABPamgg3MS-UILl76gMDCHS5Te_JAXZoC1HnkETw5M217SaG5ISAU0F5qETMREfTjZR9E45MDhnw7uY1vo2lffRB3ei1QqGuLh0gUnVU7TUfFYwcOqV15sb0t1lMj0mmyG5v-_dE9H6dYtRKJARltmdfSmc1HisBewx75Xh5ChJQ1hiCEDaZ1wqFjsFJ6SrKgJ7C1N7vx6QKx8YXwFH7ePG2qG39leT5JKZnqAvi9fqc6x-YwfhSjbRKGZoj2o55Fd2fbwtK6CXpiW6AekT7PUcl_7ynTq-DaQ_Yc29WwtmgapcCRNpfcMsoqCD4giu1V3Sj5DQLglwuk1gAMcuV5fo8JpABu2_is83WZ_GJ1WWMUxyZGq6u-EGuZrP96Yewb7-zfnt2lao_LJg1ef5cqDTW7-0MS27wkmLiIi0e-PYvS-UfWVHg1oNbR-MHXMVEQ6gqNg08IgEyPDSFCUbf75HuMILN80bQNtSlFj6FR7uNKHr8sigvKI80k.5flOKKmeqYm0TamwROr8Nw"
 
 const decrypted = await jose.compactDecrypt(
   fileEncrypted,
   jose.base64url.decode(shlinkPayload.key)
 );
-  
+
+console.log(decrypted.protectedHeader.cty)
+//application/smart-health-card
+
 const decoded = JSON.parse(new TextDecoder().decode(decrypted.plaintext));
 /*
 {
