@@ -7,8 +7,8 @@ sidebar_position: 2
 #### Actors
 
 * Software Applications
-  * **SHL Sharing Application**. Helps users creates, manage, and share SHLinks. Also referred to below as "server". This application can include local software as well as server-side components.
-  * **SHL Receiving Application**. Helps users receive SHLinks and work with associated content. Also referred to below as "client".
+  * **SHL Sharing Application**. Software that users creates, manage, and share SHLinks. Also referred to below as "server". This application can include local software as well as server-side components.
+  * **SHL Receiving Application**. Software that enables users to receive and access health information shared through SMART Health Links (SHLinks). Also referred to below as "client". This application can take many forms, including a lightweight web page with Javascript, a full-fledged modlue in a native EHR system, or a standalone mobile app.
 * Users
   * **Sharing User**. An individual working with a SHL Sharing Application to create/manage/share information
   * **Receiving User**. An individual working with a SHL Receiving Application to retrieve/display/use information. In autonmous use cases there may be no Receiving User.
@@ -150,7 +150,7 @@ When sharing a SHLink via QR code, the following recommendations apply:
 
 ## SHL Receiving Application processes a SHLink
 
-The SHL Receiving Application can process a SHLink using the following steps.
+The [SHL Receiving Application](#actors) can process a SHLink using the following steps.
 
 * Decode the SHLink JSON payload
 * Issue a [SHLink Manifest Request](#shlink-manifest-request) to payload's `url`
